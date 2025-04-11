@@ -62,30 +62,33 @@ df['Poengsum'] = pd.to_numeric(df['Poengsum'], errors='coerce')  # Convert to fl
 illustrationimage = Image.open('beerpals.png')
 #displaying the image on streamlit app
 
+selected_beer = 'none'
 
 st.title("Ølklubben oversikt")
 
-picture = st.camera_input("Ta bilde av etiketten 📷")
+with st.expander("**Står du foran hylla?  Søk med kameraet her**"):
+    picture = st.camera_input("Ta bilde av etiketten 📷")
 
-# If a picture is taken, display it
-if picture:
-   
-#    st.image(picture, caption="Ditt bilde", use_container_width=True)
+    # If a picture is taken, display it
+    if picture:
+    
+    #    st.image(picture, caption="Ditt bilde", use_container_width=True)
 
-    with st.spinner("Leser etikett..."):
-        extracted_text = extract_text_from_image(picture)
+        with st.spinner("Leser etikett..."):
+            extracted_text = extract_text_from_image(picture)
 
-    st.subheader("🔍 Tekst funnet på etiketten:")
-    st.code(extracted_text)
-    if st.button("Søk etter noe som ligner ?"):
-        beer_names = df["Navn"].dropna().tolist()  # Get the list of beer names from the DataFrame
-        matches = find_best_beer_matches(extracted_text, beer_names)
-        st.subheader("🔎 Beste treff i våre annaler:")
-        for name, score, _ in matches:
-            st.write(f"✅ {name}  —  match score: {score}")
+        st.subheader("🔍 Tekst funnet på etiketten:")
+        st.code(extracted_text)
+        if st.button("Søk etter noe som ligner ?"):
+            beer_names = df["Navn"].dropna().tolist()  # Get the list of beer names from the DataFrame
+            matches = find_best_beer_matches(extracted_text, beer_names)
+            st.subheader("🔎 Beste treff i våre annaler:")
+            for name, score, _ in matches:
+                st.write(f"✅ {name}  —  {score:.0f} % match")
 
-   
-
+               
+                      
+ 
 
 col1, col2 = st.columns(2)
 
@@ -118,8 +121,6 @@ if selected_producer != "Alle produsenter":
 
 # Alkololinnhold filter
 # Convert ABV strings with comma to float
-
-
 abv_series = filtered_df['%'].dropna()  # remove NaN before min/max
 
 min_abv = float(abv_series.min())
@@ -170,16 +171,11 @@ labels = alt.Chart(chart_df).mark_text(
     text=alt.Text("Poengsum:Q", format=".1f")  # format with one decimal
 )
 
-
-
 bar_chart = (bars + labels).properties(
     title="Rangering",
     width=600,
  #   height=500
 )
 
-# Display the chart in your Streamlit app
-st.altair_chart(bar_chart, use_container_width=True)
-
-
+st.altair_chart(bar_chart, use_container_width=True) # Display the chart in your Streamlit app
 st.image(illustrationimage)
