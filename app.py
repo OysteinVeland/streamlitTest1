@@ -1,6 +1,39 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+import requests
+from PIL import Image
+import io
+
+
+OCR_API_KEY = "K89559071588957"
+
+def extract_text_from_image(uploaded_picture):
+    url = 'https://api.ocr.space/parse/image'
+    uploaded_image = Image.open(uploaded_picture).convert("RGB")
+    # Convert image to JPEG in memory
+    buffer = io.BytesIO()
+    uploaded_image.save(buffer, format="JPEG")
+    buffer.seek(0)
+
+    response = requests.post(
+        url,
+        files={'filename':  ('beer.jpg', buffer, 'image/jpeg')},
+        data={
+            'apikey': OCR_API_KEY,
+         #   'language':  'eng', 'deu', etc.
+            'isOverlayRequired': False,
+        }
+    )
+
+    result = response.json()
+    if result.get("IsErroredOnProcessing"):
+        st.error("❌ OCR failed")
+        st.write("📦 Full response:", result)
+        return "Klarer ikke lese noe tekst fra bildet. Skjerp deg!"
+
+    parsed_text = result['ParsedResults'][0]['ParsedText']
+    return parsed_text.strip()
 
 # Replace with your actual CSV export URL from Google Sheets
 csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSoPr88VI9diu7isjOUtJwR1zIHQxn3Bdk0XsLKsbFXsOWbtYwdvaGkKLaFUMqOLDEORT3AdzOFTMCa/pub?gid=841858480&single=true&output=csv"
@@ -15,8 +48,31 @@ df['%'] = pd.to_numeric(df['%'], errors='coerce')  # Convert to float, non-conve
 df['Poengsum'] = df['Poengsum'].astype(str).str.replace(",", ".", regex=False).str.strip()
 df['Poengsum'] = pd.to_numeric(df['Poengsum'], errors='coerce')  # Convert to float, non-convertibles become NaN
 
+#opening the image
+
+illustrationimage = Image.open('beerpals.png')
+#displaying the image on streamlit app
+
 
 st.title("Ølklubben oversikt")
+
+picture = st.camera_input("Ta et bilde av øletiketten 📷")
+
+# If a picture is taken, display it
+if picture:
+   
+#    st.image(picture, caption="Ditt bilde", use_container_width=True)
+
+    with st.spinner("Leser etikett..."):
+        extracted_text = extract_text_from_image(picture)
+
+    st.subheader("🔍 Tekst funnet på etiketten:")
+    st.code(extracted_text)
+    if st.button("Søk etter noe som ligner ..."):
+        # Assuming you want to search in a specific column named 'Name'
+        filtered_df = df[df['Navn'].str.contains(extracted_text, case=False, na=False)]
+        st.write(len(filtered_df), " øl:", filtered_df[["Navn", "%","Poengsum","Produsent", "Land"]])
+    
 
 col1, col2 = st.columns(2)
 
@@ -111,3 +167,6 @@ bar_chart = (bars + labels).properties(
 
 # Display the chart in your Streamlit app
 st.altair_chart(bar_chart, use_container_width=True)
+
+
+st.image(illustrationimage)
