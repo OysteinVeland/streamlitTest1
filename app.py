@@ -186,15 +186,17 @@ bar_chart = (bars + labels).properties(
  #   height=500
 )
 
-st.altair_chart(bar_chart, use_container_width=True) # Display the chart in your Streamlit app
+# Tatt ut barchart - ga rare resultater for øl med flere entryer -
+# st.altair_chart(bar_chart, use_container_width=True) # Display the chart in your Streamlit app
 st.image(illustrationimage)
 
 
 st.write("Coming soon:")
-st.button("Samkjør handling")
+st.button("Samkjøre innkjøp")
 st.button("Legg inn kveldens øl")
 st.button("Les opp åpningsdikt")
-st.button("Avgi poeng - og juster")
+st.button("Avgi poeng")
+st.button("Avgi justere poeng")
 st.button("Planlegg øltur")
 st.button("Planlegg whiskeytur")
 st.button("Bestill hjemreise")
