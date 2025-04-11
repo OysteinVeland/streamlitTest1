@@ -54,8 +54,8 @@ df = pd.read_csv(csv_url)
 df['%'] = df['%'].astype(str).str.replace(",", ".", regex=False).str.strip()
 df['%'] = pd.to_numeric(df['%'], errors='coerce')  # Convert to float, non-convertibles become NaN
 
-df['Poengsum'] = df['Poengsum'].astype(str).str.replace(",", ".", regex=False).str.strip()
-df['Poengsum'] = pd.to_numeric(df['Poengsum'], errors='coerce')  # Convert to float, non-convertibles become NaN
+df['Snitt pr deltager'] = df['Snitt pr deltager'].astype(str).str.replace(",", ".", regex=False).str.strip()
+df['Snitt pr deltager'] = pd.to_numeric(df['Snitt pr deltager'], errors='coerce').round(1)
 
 #opening the image
 
@@ -78,14 +78,19 @@ with st.expander("**Står du foran hylla?  Søk med kameraet her**"):
             extracted_text = extract_text_from_image(picture)
 
         st.subheader("🔍 Tekst funnet på etiketten:")
-        st.code(extracted_text)
+        edited_text = st.text_input("Rediger eller bekreft teksten", value=extracted_text)
+       
         if st.button("Søk etter noe som ligner ?"):
             beer_names = df["Navn"].dropna().tolist()  # Get the list of beer names from the DataFrame
-            matches = find_best_beer_matches(extracted_text, beer_names)
+            matches = find_best_beer_matches(edited_text, beer_names)
+            match_names = matches # [match[0] for match in matches if match[1] > 10]  # Filter weak matches
+                      
             st.subheader("🔎 Beste treff i våre annaler:")
-            for name, score, _ in matches:
+            for name, score, _ in match_names:
                 st.write(f"✅ {name}  —  {score:.0f} % match")
-
+                match_info = df[df["Navn"] == name]
+                for _, row in match_info.iterrows():
+                    st.write(f"📅 Dato: {row['Dato']}  |  📍 Hos: {row['Arrangør']}  |  🏅 Plassering: {row['Plass']}")
                
                       
  
@@ -142,33 +147,33 @@ if search_term:
     # Assuming you want to search in a specific column named 'Name'
    filtered_df = filtered_df[filtered_df['Navn'].str.contains(search_term, case=False, na=False)]
 
-st.write(len(filtered_df), " øl:", filtered_df[["Navn", "%","Poengsum","Produsent", "Land"]])
+st.write(len(filtered_df), " øl:", filtered_df[["Navn", "%","Snitt pr deltager","Produsent", "Land"]])
 
 
 # First, sort the filtered DataFrame by score descending
-chart_df = filtered_df.sort_values(by="Poengsum", ascending=False)
+chart_df = filtered_df.sort_values(by="Snitt pr deltager", ascending=False)
 
 # Optional: Drop NaNs in case some scores are missing
-chart_df = chart_df.dropna(subset=["Poengsum", "Navn"])
+chart_df = chart_df.dropna(subset=["Snitt pr deltager", "Navn"])
 
 # Create a horizontal bar chart
 bars = alt.Chart(chart_df).mark_bar(color="#336f77a4").encode(
-    x=alt.X("Poengsum:Q", title="Poengsum"),
+    x=alt.X("Snitt pr deltager:Q", title="Snitt pr deltager"),
     y=alt.Y("Navn:N", sort="-x", title="Øl / Navn", axis=alt.Axis(labelLimit=250) ),
-    tooltip=["Navn", "Poengsum"]
+    tooltip=["Navn", "Snitt pr deltager"]
    # ,color=alt.Color("Poengsum:Q", scale=alt.Scale(scheme="blues"), legend=None),
 ).properties(
     width=600,
-    title="Poengsum for utvalgte øl"
+    title="Poengsnitt"
 )
 labels = alt.Chart(chart_df).mark_text(
     align="left",
     baseline="middle",
     dx=3  # moves text slightly to the right of the bar
 ).encode(
-    x="Poengsum:Q",
+    x="Poengsnitt:Q",
     y=alt.Y("Navn:N", sort="-x"),
-    text=alt.Text("Poengsum:Q", format=".1f")  # format with one decimal
+    text=alt.Text("Poengnitt:Q", format=".1f")  # format with one decimal
 )
 
 bar_chart = (bars + labels).properties(
