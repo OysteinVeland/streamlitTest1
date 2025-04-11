@@ -42,8 +42,6 @@ def find_best_beer_matches(ocr_text, beer_names, limit=3):
     return matches
 
 
-
-
 # Replace with your actual CSV export URL from Google Sheets
 csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSoPr88VI9diu7isjOUtJwR1zIHQxn3Bdk0XsLKsbFXsOWbtYwdvaGkKLaFUMqOLDEORT3AdzOFTMCa/pub?gid=841858480&single=true&output=csv"
 
@@ -64,7 +62,7 @@ illustrationimage = Image.open('beerpals.png')
 
 selected_beer = 'none'
 
-st.title("Ølklubben oversikt")
+st.title("Lindås øldrikkarlag app")
 
 with st.expander("**Står du foran hylla?  Søk med kameraet her**"):
     picture = st.camera_input("Ta bilde av etiketten 📷")
@@ -97,8 +95,7 @@ with st.expander("**Står du foran hylla?  Søk med kameraet her**"):
 
 col1, col2 = st.columns(2)
 
-# Adding a simple search functionality
-search_term = st.text_input("Søk på ølnavn:")
+
 
 # Extract unique countries and create a list for the dropdown
 # Include an "All Countries" option so users can opt-out of filtering
@@ -108,20 +105,20 @@ unique_countries = sorted(df['Land'].dropna().astype(str).unique())
 countries = ["Alle land"] + unique_countries
 with col1:
     selected_country = st.selectbox("", options=countries)
-
-if selected_country != "Alle land":
-    filtered_df = df[df['Land'] == selected_country]
-else:
-    filtered_df = df
+    if selected_country != "Alle land":
+        filtered_df = df[df['Land'] == selected_country]
+    else:
+        filtered_df = df
 
 
 unique_producers = sorted(filtered_df['Produsent'].dropna().astype(str).unique())
 producers = ["Alle produsenter"] + unique_producers
 with col2:
+
     selected_producer = st.selectbox("", options=producers)
 
-if selected_producer != "Alle produsenter":
-    filtered_df = filtered_df[filtered_df['Produsent'] == selected_producer]
+    if selected_producer != "Alle produsenter":
+        filtered_df = filtered_df[filtered_df['Produsent'] == selected_producer]
 
 
 # Alkololinnhold filter
@@ -133,23 +130,30 @@ max_abv = float(abv_series.max())
 if (min_abv == max_abv):
     max_abv=min_abv+0.1
 
-abv_range = st.slider(
-    "Alkoholinnhold (% ABV)",
-    min_value=min_abv,
-    max_value=max_abv,
-    value=(min_abv, max_abv),
-    step=0.1
-)
-filtered_df = filtered_df[(df['%'] >= abv_range[0]) & (filtered_df['%'] <= abv_range[1])]
+with col2:
+    abv_range = st.slider(
+        "Alkoholinnhold (% ABV)",
+        min_value=min_abv,
+        max_value=max_abv,
+        value=(min_abv, max_abv),
+        step=0.1
+    )
+    filtered_df = filtered_df[(df['%'] >= abv_range[0]) & (filtered_df['%'] <= abv_range[1])]
+
+# Adding a simple search functionality
+with col1:
+    search_term = st.text_input("Søk på ølnavn:")
 
 # Filter the DataFrame based on the search term
 if search_term:
     # Assuming you want to search in a specific column named 'Name'
    filtered_df = filtered_df[filtered_df['Navn'].str.contains(search_term, case=False, na=False)]
 
-st.write(len(filtered_df), " øl:", filtered_df[["Navn", "%","Snitt pr deltager","Produsent", "Land"]])
-
-
+st.write(len(filtered_df), " øl:")
+st.dataframe ( 
+    filtered_df[["Navn", "%","Snitt pr deltager","Produsent", "Land"]],
+    use_container_width=True, hide_index=True
+)
 # First, sort the filtered DataFrame by score descending
 chart_df = filtered_df.sort_values(by="Snitt pr deltager", ascending=False)
 
@@ -184,3 +188,13 @@ bar_chart = (bars + labels).properties(
 
 st.altair_chart(bar_chart, use_container_width=True) # Display the chart in your Streamlit app
 st.image(illustrationimage)
+
+
+st.write("Coming soon:")
+st.button("Samkjør handling")
+st.button("Legg inn kveldens øl")
+st.button("Les opp åpningsdikt")
+st.button("Avgi poeng - og juster")
+st.button("Planlegg øltur")
+st.button("Planlegg whiskeytur")
+st.button("Bestill hjemreise")
