@@ -4,7 +4,8 @@ import altair as alt
 import requests
 from PIL import Image
 import io
-
+import rapidfuzz
+from rapidfuzz import fuzz, process
 
 OCR_API_KEY = "K89559071588957"
 
@@ -35,6 +36,14 @@ def extract_text_from_image(uploaded_picture):
     parsed_text = result['ParsedResults'][0]['ParsedText']
     return parsed_text.strip()
 
+def find_best_beer_matches(ocr_text, beer_names, limit=3):
+    # Returns a list of (match, score) tuples
+    matches = process.extract(ocr_text, beer_names, scorer=fuzz.token_sort_ratio, limit=limit)
+    return matches
+
+
+
+
 # Replace with your actual CSV export URL from Google Sheets
 csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSoPr88VI9diu7isjOUtJwR1zIHQxn3Bdk0XsLKsbFXsOWbtYwdvaGkKLaFUMqOLDEORT3AdzOFTMCa/pub?gid=841858480&single=true&output=csv"
 
@@ -56,7 +65,7 @@ illustrationimage = Image.open('beerpals.png')
 
 st.title("Ølklubben oversikt")
 
-picture = st.camera_input("Ta et bilde av øletiketten 📷")
+picture = st.camera_input("Ta bilde av etiketten 📷")
 
 # If a picture is taken, display it
 if picture:
@@ -68,11 +77,15 @@ if picture:
 
     st.subheader("🔍 Tekst funnet på etiketten:")
     st.code(extracted_text)
-    if st.button("Søk etter noe som ligner ..."):
-        # Assuming you want to search in a specific column named 'Name'
-        filtered_df = df[df['Navn'].str.contains(extracted_text, case=False, na=False)]
-        st.write(len(filtered_df), " øl:", filtered_df[["Navn", "%","Poengsum","Produsent", "Land"]])
-    
+    if st.button("Søk etter noe som ligner ?"):
+        beer_names = df["Navn"].dropna().tolist()  # Get the list of beer names from the DataFrame
+        matches = find_best_beer_matches(extracted_text, beer_names)
+        st.subheader("🔎 Beste treff i våre annaler:")
+        for name, score, _ in matches:
+            st.write(f"✅ {name}  —  match score: {score}")
+
+   
+
 
 col1, col2 = st.columns(2)
 
