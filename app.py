@@ -62,8 +62,8 @@ illustrationimage = Image.open('beerpals.png')
 
 selected_beer = 'none'
 
-st.title("Lindås øldrikkarlag app")
-
+#t.title("Lindås øldrikkarlag app")
+st.header("Lindås øldrikkar-app")
 with st.expander("**Står du foran hylla?  Søk med kameraet her**"):
     picture = st.camera_input("Ta bilde av etiketten 📷")
 
@@ -132,7 +132,7 @@ if (min_abv == max_abv):
 
 with col2:
     abv_range = st.slider(
-        "Alkoholinnhold (% ABV)",
+        "Alkohol %",
         min_value=min_abv,
         max_value=max_abv,
         value=(min_abv, max_abv),
@@ -152,8 +152,7 @@ if search_term:
 st.write(len(filtered_df), " øl:")
 st.dataframe ( 
     filtered_df[["Navn", "%","Snitt pr deltager","Produsent", "Land"]],
-    use_container_width=True, hide_index=True
-)
+    use_container_width=True, hide_index=True, height=800)
 # First, sort the filtered DataFrame by score descending
 chart_df = filtered_df.sort_values(by="Snitt pr deltager", ascending=False)
 
