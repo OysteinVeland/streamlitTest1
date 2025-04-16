@@ -23,7 +23,11 @@ col1, col2 = st.columns(2)
 unique_countries = sorted(df['Land'].dropna().astype(str).unique())
 countries = ["Alle land"] + unique_countries
 with col1:
-    selected_country = st.selectbox("", options=countries)
+    selected_country = st.selectbox(
+        "Land",
+        options=countries,
+        label_visibility="collapsed"
+    )
     if selected_country != "Alle land":
         filtered_df = df[df['Land'] == selected_country]
     else:
@@ -33,7 +37,11 @@ with col1:
 unique_producers = sorted(filtered_df['Produsent'].dropna().astype(str).unique())
 producers = ["Alle produsenter"] + unique_producers
 with col2:
-    selected_producer = st.selectbox("", options=producers)
+    selected_producer = st.selectbox(
+        "Produsent",
+        options=producers,
+        label_visibility="collapsed"
+    )
     if selected_producer != "Alle produsenter":
         filtered_df = filtered_df[filtered_df['Produsent'] == selected_producer]
 
