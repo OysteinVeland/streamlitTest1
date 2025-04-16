@@ -14,8 +14,6 @@ df['%'] = pd.to_numeric(df['%'], errors='coerce')  # Convert to float, non-conve
 df['Snitt pr deltager'] = df['Snitt pr deltager'].astype(str).str.replace(",", ".", regex=False).str.strip()
 df['Snitt pr deltager'] = pd.to_numeric(df['Snitt pr deltager'], errors='coerce').round(1)
 
-# Load the illustration image
-illustrationimage = Image.open('beerpals.png')
 
 st.header("Ølhistorikk")
 
@@ -71,5 +69,3 @@ st.dataframe(
     height=800
 )
 
-# Display the illustration
-st.image(illustrationimage) 
