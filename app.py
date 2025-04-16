@@ -4,13 +4,6 @@ from PIL import Image
 # Load the illustration image
 illustrationimage = Image.open('beerpals.png')
 
-# This configures your main app page
-st.set_page_config(
-    page_title="My App",  # Browser tab title
-    page_icon="🏠",       # Browser tab icon
-)
-
-
 st.header("Lindås øldrikkar-app")
 st.image(illustrationimage)
 

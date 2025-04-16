@@ -9,4 +9,4 @@ font = "sans serif"
 enableCORS = false
 enableXsrfProtection = false 
 
-entrypoint = "Oversikt.py"
+entrypoint = "app.py"
