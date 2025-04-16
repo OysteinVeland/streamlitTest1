@@ -4,11 +4,18 @@ from PIL import Image
 # Load the illustration image
 illustrationimage = Image.open('beerpals.png')
 
-st.title("Lindås øldrikkar-app")
+# This configures your main app page
+st.set_page_config(
+    page_title="My App",  # Browser tab title
+    page_icon="🏠",       # Browser tab icon
+)
+
+
+st.header("Lindås øldrikkar-app")
 st.image(illustrationimage)
 
 st.write("""
-Velkommen til Lindås øldrikkar-app! Her kan du:
+Her kan du:
 
 - Se gjennom vår ølhistorikk og søke etter øl
 - Bruke kameraet til å identifisere øl i butikken

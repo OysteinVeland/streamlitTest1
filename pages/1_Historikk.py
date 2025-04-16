@@ -13,8 +13,7 @@ df['%'] = pd.to_numeric(df['%'], errors='coerce')  # Convert to float, non-conve
 
 df['Snitt pr deltager'] = df['Snitt pr deltager'].astype(str).str.replace(",", ".", regex=False).str.strip()
 df['Snitt pr deltager'] = pd.to_numeric(df['Snitt pr deltager'], errors='coerce').round(1)
-
-
+st.set_page_config(layout="wide")
 st.header("Ølhistorikk")
 
 col1, col2 = st.columns(2)
